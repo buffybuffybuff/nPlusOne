@@ -1,0 +1,61 @@
+import nltk
+import string
+
+def nounList():
+    ##build dictionary
+    ##open dict file
+    textObject=open('alphadict.txt', encoding="utf8").readlines()
+    ##initialize nounlist
+    nouns=[]
+    ##trim newlines
+    for i in range(len(textObject)):
+        textObject[i]=textObject[i].replace('\n','')
+    ##if a given word is a noun, add it to noun list
+    for i in range(len(textObject)):
+        dork=textObject[i]
+        if dork[-1:]=='N':
+            dork=dork[:-2]
+            nouns.append(dork)
+    return nouns
+
+def getNextNoun(word,nouns):
+    try:
+        if word in nouns:
+            num=nouns.index(word)
+            return nouns[num+1]
+        else:
+            nouns.append(word)
+            nouns.sort()
+            num=nouns.index(word)
+            return nouns[num+1]
+    except IndexError:
+        return 'oopps'
+
+def plusOne(nouns, doc):
+    ##open and read magazine article
+    magObject=open(doc, 'r+', encoding="utf8")
+    mag=magObject.read()
+    ##tokenize words
+    words=nltk.word_tokenize(mag)
+    ##label part of speech
+    labeledWords=nltk.pos_tag(words)
+    ##if the word is a noun
+    for i in range(len(labeledWords)):
+        minilist=labeledWords[i]
+        if minilist[1]=='NN': 
+            ##replace word
+            words[i]=getNextNoun(minilist[0],nouns)
+        elif minilist[1]=='NNS':
+            ##replace word
+            words[i]=getNextNoun(minilist[0],nouns)+'s'
+    ##initialize final story
+    story=''
+    ##add all the words to the story
+    for word in words:
+        if word in string.punctuation:
+            story=story+word
+        else:
+            story=story+' '+word
+    return story
+
+       
